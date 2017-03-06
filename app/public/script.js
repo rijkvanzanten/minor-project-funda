@@ -9,10 +9,14 @@
 
   const videoStream = {
     init() {
+      // Get all media sources (soon to be deprecated, but faceMode constraint
+      //   won't work in my version of Android Chrome
       MediaStreamTrack.getSources(sourcesInfo => {
-        const videoSource = sourcesInfo.filter(source => source.facing === 'environment');
+        // Select rear-camera
+        const videoSource = sourcesInfo.filter(source => source.facing === 'environment')[0];
+
         navigator.mediaDevices
-          .getUserMedia(this.constraints(videoSource[0].id))
+          .getUserMedia(this.constraints(videoSource.id))
           .then(this.stream)
           .catch(err => {
             console.error(err);
@@ -23,16 +27,16 @@
       return {
         audio: false,
         video: {
-          optional: [{sourceId: videoSource}]
+          mandatory: [ // only allow certain camera
+            { sourceId: videoSource }
+          ]
         }
-      }
+      };
     },
     stream(stream) {
       window.stream = stream; // make variable available to browser console
       document.getElementById('stream').srcObject = stream;
     }
   };
-
-  window.constraints = video.constraints;
   app.init();
 }());
