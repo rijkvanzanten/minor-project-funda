@@ -1,23 +1,38 @@
-/* global window, google, document */
+/* global window, navigator, document, MediaStreamTrack */
 
 (function() {
   const app = {
     init() {
-      console.log('init');
+      videoStream.init();
     }
   };
 
-  const map = {
-    instance: null,
+  const videoStream = {
     init() {
-      this.instance = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 52.379189, lng: 4.899431},
-        zoom: 6,
-        disableDefaultUI: true
+      MediaStreamTrack.getSources(sourcesInfo => {
+        const videoSource = sourcesInfo.filter(source => source.facing === 'environment');
+        navigator.mediaDevices
+          .getUserMedia(this.constraints(videoSource[0].id))
+          .then(this.stream)
+          .catch(err => {
+            console.error(err);
+          });
       });
+    },
+    constraints(videoSource) {
+      return {
+        audio: false,
+        video: {
+          optional: [{sourceId: videoSource}]
+        }
+      }
+    },
+    stream(stream) {
+      window.stream = stream; // make variable available to browser console
+      document.getElementById('stream').srcObject = stream;
     }
   };
 
-  // Make app initialization publicly available for Google maps callback
-  window.initMap = map.init;
+  window.constraints = video.constraints;
+  app.init();
 }());
