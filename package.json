@@ -19,6 +19,7 @@
   "homepage": "https://github.com/rijkvanzanten/minor-project-funda#readme",
   "dependencies": {
     "ejs": "^2.5.6",
-    "express": "^4.15.1"
+    "express": "^4.15.1",
+    "node-fetch": "^1.6.3"
   }
 }
