@@ -1,18 +1,28 @@
-/* global window, navigator, document, MediaStreamTrack */
+/* global window, navigator, document */
 
 (function() {
   const app = {
     init() {
-      compass.init();
       videoStream.init();
-      // overlay.init();
+      compass.init();
+      location.init();
+      overlay.init();
     }
+  };
+
+  const location = {
+    init() {
+      navigator.geolocation.watchPosition(position => {
+        this.position = position.coords;
+      });
+    },
+    position: {}
   };
 
   const compass = {
     init() {
       window.addEventListener('deviceorientationabsolute', event => {
-        this.value = Math.floor(360 - event.alpha);
+        this.value = Math.ceil(Math.floor(360 - event.alpha) / 5) * 5;
       });
     },
     value: null
@@ -20,12 +30,12 @@
 
   const videoStream = {
     init() {
-        navigator.mediaDevices
-          .getUserMedia(this.constraints)
-          .then(this.stream)
-          .catch(err => {
-            console.error(err);
-          });
+      navigator.mediaDevices
+        .getUserMedia(this.constraints)
+        .then(this.stream)
+        .catch(err => {
+          console.error(err);
+        });
     },
     constraints: {
       audio: false,
@@ -43,13 +53,19 @@
     },
 
     frame() {
-      window.requestAnimationFrame(overlay.frame);
+      setTimeout(() => {
+        window.requestAnimationFrame(overlay.frame);
 
-      overlay.render();
+        document.getElementById('lat').innerText = location.position.latitude;
+        document.getElementById('lng').innerText = location.position.longitude;
+        document.getElementById('com').innerText = compass.value;
+
+        overlay.render();
+      }, 1000 / 60)
     },
 
     render() {
-      console.log('render');
+
     }
   };
 
