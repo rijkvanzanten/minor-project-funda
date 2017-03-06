@@ -38,4 +38,12 @@ main {
   background-color: #e6f2f7;
   text-align: center;
   font-size: 2em;
+  position: relative;
+  height: auto;
+}
+
+#map {
+  position: absolute !important; /* google overrides this inline */
+  width: 100%;
+  height: 100%;
 }
