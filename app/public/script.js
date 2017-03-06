@@ -48,7 +48,7 @@
   const compass = {
     init() {
       window.addEventListener('deviceorientationabsolute', event => {
-        this.value = Math.ceil(Math.floor(360 - event.alpha) / 5) * 5;
+        this.value = Math.floor(360 - event.alpha);
       });
     },
     value: false
