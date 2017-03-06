@@ -29,6 +29,15 @@ app.get('/locality/:lat/:lon', (req, res) => {
     });
 });
 
+app.get('/objects/:locality/:postalCode', (req, res) => {
+  const { locality, postalCode } = req.params;
+  fetch(`http://partnerapi.funda.nl/feeds/Aanbod.svc/json/${apiKeys.funda}/?type=koop&zo=/${locality}/${postalCode}`)
+    .then(records => records.json())
+    .then(records => {
+      res.send(records.Objects);
+    });
+});
+
 app.get('*', (req, res) => res.render('index'));
 
 module.exports = app;
