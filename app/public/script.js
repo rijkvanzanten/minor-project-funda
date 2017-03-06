@@ -27,7 +27,7 @@
       return {
         audio: false,
         video: {
-          mandatory: [ // only allow certain camera
+          optional: [ // only allow certain camera
             { sourceId: videoSource }
           ]
         }
