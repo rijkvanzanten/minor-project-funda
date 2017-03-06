@@ -1,4 +1,4 @@
-/* global window, navigator, document */
+/* global window, navigator, document, fetch */
 
 (function() {
   const app = {
@@ -7,16 +7,42 @@
       compass.init();
       location.init();
       overlay.init();
+    },
+    store: {
+      isLoading: false,
+      objects: []
+    }
+  };
+
+  const request = {
+    locality(lat, lng, callback) {
+      fetch(`/locality/${lat}/${lng}`)
+        .then(res => res.json())
+        .then(res => callback(res));
+    },
+    nearObjects(position) {
+      app.store.isLoading = true;
+      fetch(`/objects/${position.locality}/${position.postalCode}`)
+        .then(res => res.json())
+        .then(res => {
+          app.store.isLoading = false;
+          app.store.objects = res;
+        });
     }
   };
 
   const location = {
     init() {
       navigator.geolocation.watchPosition(position => {
-        this.position = position.coords;
+        const { latitude, longitude } = position.coords;
+
+        request.locality(latitude, longitude, res => {
+          this.position = position.coords;
+          Object.assign(this.position, res);
+        });
       });
     },
-    position: {}
+    position: false
   };
 
   const compass = {
@@ -25,7 +51,7 @@
         this.value = Math.ceil(Math.floor(360 - event.alpha) / 5) * 5;
       });
     },
-    value: null
+    value: false
   };
 
   const videoStream = {
@@ -65,7 +91,11 @@
     },
 
     render() {
-
+      if(!app.store.isLoading && location.position && compass.value && !app.store.objects.length) {
+        request.nearObjects(location.position);
+      } else if(!app.store.isLoading && app.store.objects.length){
+        console.log(app.store.objects);
+      }
     }
   };
 
