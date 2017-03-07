@@ -59,3 +59,14 @@ main {
   left: 0;
   z-index: 10;
 }
+
+.marker-box {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translate(0, -50%);
+  width: 10vw;
+  height: 10vw;
+  background-color: #f7a103;
+}
