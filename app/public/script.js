@@ -77,12 +77,21 @@
     }
   };
 
+  /**
+   * Compass object
+   * normalizedValue = value which only gets updated when the difference is >= 5
+   * value = real-time actual value
+   */
   const compass = {
     init() {
       window.addEventListener('deviceorientationabsolute', event => {
-        this.value = Math.floor(360 - event.alpha);
+        const newValue = Math.floor(360 - event.alpha);
+
+        if (Math.abs(this.normalizedValue - newValue) >= 5) this.normalizedValue = newValue;
+        this.value = newValue;
       });
     },
+    normalizedValue: false,
     value: false
   };
 
@@ -155,7 +164,7 @@
 
           const angle = location.calculateAngle(userLatLon, objLatLon);
 
-          if(angle >= compass.value - 5 && angle <= compass.value + 5) {
+          if(angle >= compass.normalizedValue - 5 && angle <= compass.normalizedValue + 5) {
             element.style.display = 'block';
           } else {
             element.style.display = 'none';
