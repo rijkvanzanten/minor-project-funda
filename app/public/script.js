@@ -42,7 +42,39 @@
         });
       });
     },
-    position: false
+    position: false,
+
+    /**
+     * Based on the haversine formula
+     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
+     * c = 2 ⋅ atan2( √a, √(1−a) )
+     * d = R ⋅ c
+     *
+     * where φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km)
+     * http://www.movable-type.co.uk/scripts/latlong.html
+     */
+    calculateDistance(latLon1, latLon2) {
+      const radius = 6371e3; // earths radius
+      const lat1 = latLon1.lat.toRadians();
+      const lat2 = latLon2.lat.toRadians();
+      const latitudeDifference = (latLon2.lat - latLon1.lat).toRadians();
+      const longitudeDifference = (latLon2.lon - latLon1.lon).toRadians();
+
+      // This is just dark magic, check the article mentioned above
+      const a = Math.sin(latitudeDifference / 2) * Math.sin(latitudeDifference / 2) +
+              Math.cos(lat1) * Math.cos(lat2) *
+              Math.sin(longitudeDifference / 2) * Math.sin(longitudeDifference / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return radius * c;
+    },
+
+    calculateAngle(latLon1, latLon2) {
+      const lat = latLon2.lat - latLon1.lat;
+      const lon = latLon2.lon - latLon1.lon;
+
+      return Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
+    }
   };
 
   const compass = {
@@ -82,19 +114,54 @@
       setTimeout(() => {
         window.requestAnimationFrame(overlay.frame);
 
-        document.getElementById('lat').innerText = location.position.latitude;
-        document.getElementById('lng').innerText = location.position.longitude;
-        document.getElementById('com').innerText = compass.value;
-
         overlay.render();
-      }, 1000 / 60)
+      }, 1000 / 60);
     },
 
+    /**
+     * Render loop
+     */
     render() {
+      // If not loading and no records
       if(!app.store.isLoading && location.position && compass.value && !app.store.objects.length) {
         request.nearObjects(location.position);
-      } else if(!app.store.isLoading && app.store.objects.length){
-        console.log(app.store.objects);
+      }
+
+      // If records but no markers rendered
+      else if(!app.store.isLoading && app.store.objects.length && !document.querySelectorAll('.marker-box').length) {
+        const template = document.getElementById('marker');
+
+        app.store.objects.forEach(obj => {
+          const instance = template.content.cloneNode(true);
+          instance.querySelector('.marker-box').innerText = obj.Adres;
+          instance.querySelector('.marker-box').id = obj.Id;
+          document.getElementById('overlay').append(instance);
+        });
+      }
+
+      // Main marker positioning
+      else {
+        const userLatLon = {
+          lat: location.position.latitude,
+          lon: location.position.longitude
+        };
+
+        app.store.objects.forEach(obj => {
+          const element = document.getElementById(obj.Id);
+          const objLatLon = {
+            lat: obj.WGS84_Y,
+            lon: obj.WGS84_X
+          };
+
+          const angle = location.calculateAngle(userLatLon, objLatLon);
+
+          if(angle >= compass.value - 5 && angle <= compass.value + 5) {
+            element.style.display = 'block';
+          } else {
+            element.style.display = 'none';
+          }
+
+        });
       }
     }
   };
