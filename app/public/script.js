@@ -73,7 +73,7 @@
     },
     nearObjects(position) {
       app.store.isLoading = true;
-      position.postalCode = position.postalCode || 1091;
+      position.postalCode = position.postalCode || 1091; // default to weesperplein for demo purposes
       fetch(`/objects/${position.locality}/${position.postalCode}`)
         .then(res => res.json())
         .then(res => {
@@ -162,16 +162,21 @@
         const template = document.getElementById('marker');
 
         app.store.objects.forEach(obj => {
-          const instance = template.content.cloneNode(true);
-          instance.querySelector('.marker-box').innerText = utils.calculateDistance({
+          const distance = utils.calculateDistance({
             lat: location.position.latitude,
             lon: location.position.longitude
           }, {
             lat: obj.WGS84_Y,
             lon: obj.WGS84_X
           });
-          instance.querySelector('.marker-box').id = obj.Id;
-          document.getElementById('overlay').append(instance);
+
+          if(distance <= 2000) {
+            const instance = template.content.cloneNode(true);
+            instance.getElementById('distance').innerText = distance + 'm';
+            instance.querySelector('.marker-box').href = obj.URL;
+            instance.querySelector('.marker-box').id = obj.Id;
+            document.getElementById('overlay').append(instance);
+          }
         });
       }
 
@@ -205,11 +210,12 @@
             const delta = angle - compass.alpha;
 
             const distance = utils.calculateDistance(userLatLon, objLatLon);
-            const scale = utils.convertRange(distance, {min: 0, max: 3000}, {min: 1, max: 0.3});
+            const scale = utils.convertRange(distance, {min: 0, max: 2000}, {min: 1, max: 0.3});
             const translation = utils.convertRange(delta, visibleArea, viewportOffset);
 
-            element.style.display = 'block';
+            element.style.display = 'flex';
             element.style.transform = `scale(${scale}) translate(${translation}px, ${compass.beta * 10}px)`;
+            element.style.zIndex = `${scale}`; // dem nasty codes
           } else {
             element.style.display = 'none';
           }
