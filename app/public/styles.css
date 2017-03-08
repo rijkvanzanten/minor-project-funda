@@ -69,4 +69,5 @@ main {
   width: 10vw;
   height: 10vw;
   background-color: #f7a103;
+  display: none;
 }
