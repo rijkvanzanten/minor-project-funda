@@ -215,7 +215,8 @@
 
             element.style.display = 'flex';
             element.style.transform = `scale(${scale}) translate(${translation}px, ${compass.beta * 10}px)`;
-            element.style.zIndex = `${scale}`; // dem nasty codes
+            element.style.zIndex = `${Math.floor(scale * 100)}`; // dem nasty codes
+            element.style.opacity = `${scale}`; // dem nasty codes
           } else {
             element.style.display = 'none';
           }
