@@ -46,8 +46,8 @@
     },
 
     // Converts value to another range
-    convertRange(value, rangeA, rangeB) {
-      return ((value - rangeA.min) * (rangeB.max - rangeB.min)) / (rangeA.max - rangeA.min) + rangeB.min;
+    convertRange(value, oldRange, newRange) {
+      return ((value - oldRange.min) * (newRange.max - newRange.min)) / (oldRange.max - oldRange.min) + newRange.min;
     }
   };
 
@@ -57,6 +57,8 @@
       compass.init();
       location.init();
       overlay.init();
+
+      this.width = window.innerWidth;
     },
     store: {
       isLoading: false,
@@ -106,11 +108,9 @@
       window.addEventListener('deviceorientationabsolute', event => {
         const newValue = Math.floor(360 - event.alpha);
 
-        if (Math.abs(this.normalizedValue - newValue) >= 5) this.normalizedValue = newValue;
         this.value = newValue;
       });
     },
-    normalizedValue: false,
     value: false
   };
 
@@ -130,7 +130,8 @@
     stream(stream) {
       window.stream = stream; // make variable available to browser console
       document.getElementById('stream').srcObject = stream;
-    }
+    },
+    cameraFOV: 20
   };
 
   const overlay = {
@@ -183,8 +184,21 @@
 
           const angle = utils.calculateAngle(userLatLon, objLatLon);
 
-          if(angle >= compass.normalizedValue - 5 && angle <= compass.normalizedValue + 5) {
+          const visibleArea = {
+            min: -videoStream.cameraFOV / 2,
+            max: videoStream.cameraFOV / 2
+          };
+
+          const viewportOffset = {
+            min: -app.width / 2,
+            max: app.width / 2
+          };
+
+          if(angle >= compass.value + visibleArea.min && angle <= compass.value + visibleArea.max) {
+            const delta = angle - compass.value;
+
             element.style.display = 'block';
+            element.style.transform = `translateX(${utils.convertRange(delta, visibleArea, viewportOffset)}px)`;
           } else {
             element.style.display = 'none';
           }
