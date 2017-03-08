@@ -61,4 +61,23 @@ main {
   background-color: #f7a103;
   display: none;
   transition: transform 100ms;
+  color: white;
+  font-size: 1rem;
+  text-align: center;
+  border-radius: 0.5em;
+  box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.5);
+
+  justify-content: center;
+  align-items: center;
+}
+
+.marker-box svg {
+  width: 80%;
+  display: block;
+}
+
+.marker-box p {
+  position: absolute;
+  top: 100%;
+  margin: 0;
 }
