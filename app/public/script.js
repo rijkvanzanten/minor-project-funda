@@ -43,6 +43,11 @@
       }
 
       return angle;
+    },
+
+    // Converts value to another range
+    convertRange(value, rangeA, rangeB) {
+      return ((value - rangeA.min) * (rangeB.max - rangeB.min)) / (rangeA.max - rangeA.min) + rangeB.min;
     }
   };
 
