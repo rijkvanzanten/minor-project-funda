@@ -108,7 +108,8 @@
       window.addEventListener('deviceorientationabsolute', event => {
         const newValue = Math.floor(360 - event.alpha);
 
-        this.value = newValue;
+        this.alpha = newValue;
+        this.beta = (90 - event.beta) * -1; // handheld vs tabletop
       });
     },
     value: false
@@ -131,7 +132,7 @@
       window.stream = stream; // make variable available to browser console
       document.getElementById('stream').srcObject = stream;
     },
-    cameraFOV: 20
+    cameraFOV: 40
   };
 
   const overlay = {
@@ -152,7 +153,7 @@
      */
     render() {
       // If not loading and no records
-      if(!app.store.isLoading && location.position && compass.value && !app.store.objects.length) {
+      if(!app.store.isLoading && location.position && compass.alpha && !app.store.objects.length) {
         request.nearObjects(location.position);
       }
 
@@ -200,15 +201,15 @@
             max: app.width / 2
           };
 
-          if(angle >= compass.value + visibleArea.min && angle <= compass.value + visibleArea.max) {
-            const delta = angle - compass.value;
+          if(angle >= compass.alpha + visibleArea.min && angle <= compass.alpha + visibleArea.max) {
+            const delta = angle - compass.alpha;
 
             const distance = utils.calculateDistance(userLatLon, objLatLon);
             const scale = utils.convertRange(distance, {min: 0, max: 3000}, {min: 1, max: 0.3});
             const translation = utils.convertRange(delta, visibleArea, viewportOffset);
 
             element.style.display = 'block';
-            element.style.transform = `scale(${scale}) translateX(${translation}px)`;
+            element.style.transform = `scale(${scale}) translate(${translation}px, ${compass.beta * 10}px)`;
           } else {
             element.style.display = 'none';
           }
