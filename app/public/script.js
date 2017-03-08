@@ -204,11 +204,11 @@
             const delta = angle - compass.value;
 
             const distance = utils.calculateDistance(userLatLon, objLatLon);
-            const speedMultiplication = utils.convertRange(distance, {min: 0, max: 3000}, {min: 1, max: 0.5});
-            const translation = speedMultiplication * utils.convertRange(delta, visibleArea, viewportOffset);
+            const scale = utils.convertRange(distance, {min: 0, max: 3000}, {min: 1, max: 0.3});
+            const translation = utils.convertRange(delta, visibleArea, viewportOffset);
 
             element.style.display = 'block';
-            element.style.transform = `translateX(${translation}px)`;
+            element.style.transform = `scale(${scale}) translateX(${translation}px)`;
           } else {
             element.style.display = 'none';
           }

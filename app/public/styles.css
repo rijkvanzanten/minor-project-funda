@@ -49,14 +49,16 @@ main {
   top: 0;
   left: 0;
   object-fit: cover;
+  perspective(1000px);
 }
 
 .marker-box {
   position: fixed;
-  width: 10vw;
-  height: 10vw;
-  top: calc(50vh - 10vw);
-  left: 40vw;
+  width: 15vw;
+  height: 15vw;
+  top: calc(50vh - 15vw);
+  left: 35vw;
   background-color: #f7a103;
   display: none;
+  transition: transform 100ms;
 }
