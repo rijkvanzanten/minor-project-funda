@@ -1,6 +1,51 @@
 /* global window, navigator, document, fetch */
 
 (function() {
+  const utils = {
+    /**
+     * Measures distance between two lat lng points
+     *
+     * Based on the haversine formula
+     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
+     * c = 2 ⋅ atan2( √a, √(1−a) )
+     * d = R ⋅ c
+     *
+     * where φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km)
+     * http://www.movable-type.co.uk/scripts/latlong.html
+     */
+    calculateDistance(latLon1, latLon2) {
+      const radius = 6371e3; // earths radius
+      const lat1 = latLon1.lat.toRadians();
+      const lat2 = latLon2.lat.toRadians();
+      const latitudeDifference = (latLon2.lat - latLon1.lat).toRadians();
+      const longitudeDifference = (latLon2.lon - latLon1.lon).toRadians();
+
+      // This is just dark magic, check the article mentioned above
+      const a = Math.sin(latitudeDifference / 2) * Math.sin(latitudeDifference / 2) +
+              Math.cos(lat1) * Math.cos(lat2) *
+              Math.sin(longitudeDifference / 2) * Math.sin(longitudeDifference / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return radius * c;
+    },
+
+    /**
+     * Measures angle v north between two points
+     */
+    calculateAngle(latLon1, latLon2) {
+      const lat = latLon2.lat - latLon1.lat;
+      const lon = latLon2.lon - latLon1.lon;
+
+      let angle = Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
+
+      while(angle < 0) {
+        angle += 360;
+      }
+
+      return angle;
+    }
+  };
+
   const app = {
     init() {
       videoStream.init();
@@ -11,7 +56,8 @@
     store: {
       isLoading: false,
       objects: []
-    }
+    },
+    width: 0
   };
 
   const request = {
@@ -42,45 +88,7 @@
         });
       });
     },
-    position: false,
-
-    /**
-     * Based on the haversine formula
-     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
-     * c = 2 ⋅ atan2( √a, √(1−a) )
-     * d = R ⋅ c
-     *
-     * where φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km)
-     * http://www.movable-type.co.uk/scripts/latlong.html
-     */
-    calculateDistance(latLon1, latLon2) {
-      const radius = 6371e3; // earths radius
-      const lat1 = latLon1.lat.toRadians();
-      const lat2 = latLon2.lat.toRadians();
-      const latitudeDifference = (latLon2.lat - latLon1.lat).toRadians();
-      const longitudeDifference = (latLon2.lon - latLon1.lon).toRadians();
-
-      // This is just dark magic, check the article mentioned above
-      const a = Math.sin(latitudeDifference / 2) * Math.sin(latitudeDifference / 2) +
-              Math.cos(lat1) * Math.cos(lat2) *
-              Math.sin(longitudeDifference / 2) * Math.sin(longitudeDifference / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-      return radius * c;
-    },
-
-    calculateAngle(latLon1, latLon2) {
-      const lat = latLon2.lat - latLon1.lat;
-      const lon = latLon2.lon - latLon1.lon;
-
-      let angle = Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
-
-      while(angle < 0) {
-        angle += 360;
-      }
-
-      return angle;
-    }
+    position: false
   };
 
   /**
@@ -168,7 +176,7 @@
             lon: obj.WGS84_X
           };
 
-          const angle = location.calculateAngle(userLatLon, objLatLon);
+          const angle = utils.calculateAngle(userLatLon, objLatLon);
 
           if(angle >= compass.normalizedValue - 5 && angle <= compass.normalizedValue + 5) {
             element.style.display = 'block';
