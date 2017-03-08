@@ -73,7 +73,13 @@
       const lat = latLon2.lat - latLon1.lat;
       const lon = latLon2.lon - latLon1.lon;
 
-      return Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
+      let angle = Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
+
+      while(angle < 0) {
+        angle += 360;
+      }
+
+      return angle;
     }
   };
 
