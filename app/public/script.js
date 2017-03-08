@@ -5,28 +5,21 @@
     /**
      * Measures distance between two lat lng points
      *
-     * Based on the haversine formula
-     * a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
-     * c = 2 ⋅ atan2( √a, √(1−a) )
-     * d = R ⋅ c
-     *
      * where φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km)
      * http://www.movable-type.co.uk/scripts/latlong.html
      */
     calculateDistance(latLon1, latLon2) {
-      const radius = 6371e3; // earths radius
-      const lat1 = latLon1.lat.toRadians();
-      const lat2 = latLon2.lat.toRadians();
-      const latitudeDifference = (latLon2.lat - latLon1.lat).toRadians();
-      const longitudeDifference = (latLon2.lon - latLon1.lon).toRadians();
+      const φ1 = this.toRadians(latLon1.lat);
+      const φ2 = this.toRadians(latLon2.lat);
+      const Δλ = this.toRadians(latLon2.lon - latLon1.lon);
 
-      // This is just dark magic, check the article mentioned above
-      const a = Math.sin(latitudeDifference / 2) * Math.sin(latitudeDifference / 2) +
-              Math.cos(lat1) * Math.cos(lat2) *
-              Math.sin(longitudeDifference / 2) * Math.sin(longitudeDifference / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const R = 6371e3;
 
-      return radius * c;
+      return Math.round(Math.acos(Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ)) * R);
+    },
+
+    toRadians(val) {
+      return val * Math.PI / 180;
     },
 
     /**
@@ -71,16 +64,23 @@
     locality(lat, lng, callback) {
       fetch(`/locality/${lat}/${lng}`)
         .then(res => res.json())
-        .then(res => callback(res));
+        .then(res => {
+          console.log(res);
+          return res;
+        })
+        .then(res => callback(res))
+        .catch(err => console.error(err));
     },
     nearObjects(position) {
       app.store.isLoading = true;
+      position.postalCode = position.postalCode || 1091;
       fetch(`/objects/${position.locality}/${position.postalCode}`)
         .then(res => res.json())
         .then(res => {
           app.store.isLoading = false;
           app.store.objects = res;
-        });
+        })
+        .catch(err => console.error(err));
     }
   };
 
@@ -162,7 +162,13 @@
 
         app.store.objects.forEach(obj => {
           const instance = template.content.cloneNode(true);
-          instance.querySelector('.marker-box').innerText = obj.Adres;
+          instance.querySelector('.marker-box').innerText = utils.calculateDistance({
+            lat: location.position.latitude,
+            lon: location.position.longitude
+          }, {
+            lat: obj.WGS84_Y,
+            lon: obj.WGS84_X
+          });
           instance.querySelector('.marker-box').id = obj.Id;
           document.getElementById('overlay').append(instance);
         });
@@ -197,8 +203,12 @@
           if(angle >= compass.value + visibleArea.min && angle <= compass.value + visibleArea.max) {
             const delta = angle - compass.value;
 
+            const distance = utils.calculateDistance(userLatLon, objLatLon);
+            const speedMultiplication = utils.convertRange(distance, {min: 0, max: 3000}, {min: 1, max: 0.5});
+            const translation = speedMultiplication * utils.convertRange(delta, visibleArea, viewportOffset);
+
             element.style.display = 'block';
-            element.style.transform = `translateX(${utils.convertRange(delta, visibleArea, viewportOffset)}px)`;
+            element.style.transform = `translateX(${translation}px)`;
           } else {
             element.style.display = 'none';
           }
