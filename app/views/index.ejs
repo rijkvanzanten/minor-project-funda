@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Funda</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
   <template id="marker">
@@ -16,10 +18,10 @@
   </template>
 
   <img src="/fundawonen-logo.svg" alt="Logo Funda" />
-  <main>
-    <video id="stream" autoplay></video>
-    <div id="overlay"></div>
-  </main>
+
+  <video id="video-stream" autoplay></video>
+  <div id="overlay"></div>
+
   <!-- WebRTC Polyfill. Needed to support rear-camera in video constraints-->
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
   <script src="/script.js"></script>

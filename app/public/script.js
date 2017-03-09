@@ -1,6 +1,17 @@
 /* global window, navigator, document, fetch */
 
 (function() {
+
+  startVideoStream(document.getElementById('video-stream'));
+
+  watchLocation(location => {
+    fetchObjects(location, objects => {
+      renderObjects(objects);
+    });
+  });
+
+  // Utils
+  // ----------------------------------------------------------------------------------------------------------------
   /**
    * Measures distance between two lat lng points
    *
@@ -87,4 +98,90 @@
       }
     };
   }
+
+  // Videostream
+  // ----------------------------------------------------------------------------------------------------------------
+  /**
+   * Start the video stream
+   * @param {HTMLElement} element to render video to
+   */
+  function startVideoStream(element) {
+    const constraints = {
+      audio: false,
+      video: { facingMode: 'environment' }
+    };
+
+    navigator.mediaDevices
+      .getUserMedia(constraints)
+      .then(stream => {
+        element.srcObject = stream;
+      })
+      .catch(err => console.error(err));
+  }
+
+  // Geo location
+  // ----------------------------------------------------------------------------------------------------------------
+  
+  /**
+   * Watch geo location and fire callback on changes
+   * @param {Function} callback 
+   */
+  function watchLocation(callback) {
+    navigator.geolocation.watchPosition(position => {
+      const { latitude, longitude } = position.coords;
+      callback({ latitude, longitude });
+    });
+  }
+
+  /**
+   * Fetches locality data based on geolocation
+   * @param {Object} location latitude, longitude
+   * @param {Function} callback 
+   */
+  function fetchLocality(location, callback) {
+    fetch(`/locality/${location.latitude}/${location.longitude}`)
+        .then(res => res.json())
+        .then(res => callback(res))
+        .catch(err => console.error(err));
+  }
+
+  /**
+   * Fetch Funda house objects based on locality
+   * @param {Object} location latitude, longitude
+   * @param {Function} callback
+   */
+  function fetchObjects(location, callback) {
+    fetchLocality(location, res => {
+      fetch(`/objects/${res.locality}/${res.postalCode}`)
+        .then(res => res.json())
+        .then(res => callback(res.Objects))
+        .catch(err => console.error(err));
+    });
+  }
+
+  // Rendering
+  // ----------------------------------------------------------------------------------------------------------------
+  /**
+   * Renders array of house objects to screen
+   * @param {Array} objectsArray 
+   */
+  function renderObjects(objectsArray) {
+    clearElement(document.getElementById('overlay'));
+
+    objectsArray.forEach(object => {
+
+    });
+  }
+  
+  /**
+   * Clear all children of an element
+   * @param {HTMLElement} element 
+   */
+  function clearElement(element) {
+    while(element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+  }
+
+
 }());
