@@ -158,16 +158,17 @@
     fetchLocality(location, res => {
       fetch(`/objects/${res.locality}/${res.postalCode}`)
         .then(res => res.json())
-        .then(res => {
-          return res.filter(object => {
-            const objectLocation = {
-              latitude: object.WGS84_Y,
-              longitude: object.WGS84_X
-            };
+        .then(res => res.map(object => {
+          const objectLocation = {
+            latitude: object.WGS84_Y,
+            longitude: object.WGS84_X
+          };
 
-            return calculateDistance(location, objectLocation) < 2000;
+          return Object.assign(object, {
+            distance: calculateDistance(location, objectLocation)
           });
-        })
+        }))
+        .then(res => res.filter(object => object.distance < 2000))
         .then(res => callback(res))
         .catch(err => console.error(err));
     });
@@ -183,7 +184,11 @@
     clearElement(element);
 
     objectsArray.forEach(object => {
-      console.log(object);
+      const instance = template.content.cloneNode(true);
+      instance.getElementById('distance').innerText = object.distance + 'm';
+      instance.querySelector('.marker-box').href = object.URL;
+      instance.querySelector('.marker-box').id = object.Id;
+      element.appendChild(instance);
     });
   }
   
