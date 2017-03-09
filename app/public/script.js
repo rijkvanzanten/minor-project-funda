@@ -1,274 +1,90 @@
 /* global window, navigator, document, fetch */
 
 (function() {
-  const utils = {
-    /**
-     * Measures distance between two lat lng points
-     *
-     * where φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km)
-     * http://www.movable-type.co.uk/scripts/latlong.html
-     */
-    calculateDistance(latLon1, latLon2) {
-      const φ1 = this.toRadians(latLon1.lat);
-      const φ2 = this.toRadians(latLon2.lat);
-      const Δλ = this.toRadians(latLon2.lon - latLon1.lon);
+  /**
+   * Measures distance between two lat lng points
+   *
+   * where φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km)
+   * http://www.movable-type.co.uk/scripts/latlong.html
+   *
+   * @param {Object} latLon1 lat, lng of position 1
+   * @param {Object} latLon2 lat, lng of position 2
+   * @return {Number} Meters between points
+   */
+  function calculateDistance(latLon1, latLon2) {
+    const φ1 = toRadians(latLon1.lat);
+    const φ2 = toRadians(latLon2.lat);
+    const Δλ = toRadians(latLon2.lon - latLon1.lon);
 
-      const R = 6371e3;
+    const R = 6371e3;
 
-      return Math.round(Math.acos(Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ)) * R);
-    },
-
-    toRadians(val) {
-      return val * Math.PI / 180;
-    },
-
-    /**
-     * Measures angle v north between two points
-     */
-    calculateAngle(latLon1, latLon2) {
-      const lat = latLon2.lat - latLon1.lat;
-      const lon = latLon2.lon - latLon1.lon;
-
-      let angle = Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
-
-      while(angle < 0) {
-        angle += 360;
-      }
-
-      return angle;
-    },
-
-    // Converts value to another range
-    convertRange(value, oldRange, newRange) {
-      return ((value - oldRange.min) * (newRange.max - newRange.min)) / (oldRange.max - oldRange.min) + newRange.min;
-    },
-
-    /**
-     * Underscores throttle function
-     */
-    throttle(func, wait, options) {
-      var timeout, context, args, result;
-      var previous = 0;
-      if (!options) options = {};
-
-      var later = function() {
-        previous = options.leading === false ? 0 : Date.now();
-        timeout = null;
-        result = func.apply(context, args);
-        if (!timeout) context = args = null;
-      };
-
-      var throttled = function() {
-        var now = Date.now();
-        if (!previous && options.leading === false) previous = now;
-        var remaining = wait - (now - previous);
-        context = this;
-        args = arguments;
-        if (remaining <= 0 || remaining > wait) {
-          if (timeout) {
-            clearTimeout(timeout);
-            timeout = null;
-          }
-          previous = now;
-          result = func.apply(context, args);
-          if (!timeout) context = args = null;
-        } else if (!timeout && options.trailing !== false) {
-          timeout = setTimeout(later, remaining);
-        }
-        return result;
-      };
-
-      throttled.cancel = function() {
-        clearTimeout(timeout);
-        previous = 0;
-        timeout = context = args = null;
-      };
-
-      return throttled;
-    }
-  };
-
-  const app = {
-    init() {
-      videoStream.init();
-      compass.init();
-      location.init();
-      overlay.init();
-
-      this.width = window.innerWidth;
-    },
-    store: {
-      isLoading: false,
-      objects: []
-    },
-    width: 0
-  };
-
-  const request = {
-    locality(lat, lng, callback) {
-      fetch(`/locality/${lat}/${lng}`)
-        .then(res => res.json())
-        .then(res => {
-          console.log(res);
-          return res;
-        })
-        .then(res => callback(res))
-        .catch(err => console.error(err));
-    },
-    nearObjects(position) {
-      app.store.isLoading = true;
-      position.postalCode = position.postalCode || 1091; // default to weesperplein for demo purposes
-      fetch(`/objects/${position.locality}/${position.postalCode}`)
-        .then(res => res.json())
-        .then(res => {
-          app.store.isLoading = false;
-          app.store.objects = res;
-        })
-        .catch(err => console.error(err));
-    }
-  };
-
-  const location = {
-    init() {
-      navigator.geolocation.watchPosition(position => {
-        const { latitude, longitude } = position.coords;
-
-        request.locality(latitude, longitude, res => {
-          this.position = position.coords;
-          Object.assign(this.position, res);
-        });
-      });
-    },
-    position: false
-  };
+    return Math.round(Math.acos(Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ)) * R);
+  }
 
   /**
-   * Compass object
-   * normalizedValue = value which only gets updated when the difference is >= 5
-   * value = real-time actual value
+   * Converts angle to radians
+   * @param {Number} val angle value
+   * @return {Number} radian value
    */
-  const compass = {
-    init() {
-      window.addEventListener('deviceorientationabsolute', utils.throttle(event => {
-        const newValue = Math.floor(360 - event.alpha);
+  function toRadians(val) {
+    return val * Math.PI / 180;
+  }
 
-        this.alpha = newValue;
-        this.beta = (90 - event.beta) * -1; // handheld vs tabletop
-      }), 1000 / 60);
-    },
-    value: false
-  };
+  /**
+   * Measures angle v north between two points
+   * @param {Object} latLon1 lat, lng of position 1
+   * @param {Object} latLon2 lat, lng of position 2
+   * @return {Number} angle between two points
+   */
+  function calculateAngle(latLon1, latLon2) {
+    const lat = latLon2.lat - latLon1.lat;
+    const lon = latLon2.lon - latLon1.lon;
 
-  const videoStream = {
-    init() {
-      navigator.mediaDevices
-        .getUserMedia(this.constraints)
-        .then(this.stream)
-        .catch(err => {
-          console.error(err);
-        });
-    },
-    constraints: {
-      audio: false,
-      video: { facingMode: 'environment' }
-    },
-    stream(stream) {
-      window.stream = stream; // make variable available to browser console
-      document.getElementById('stream').srcObject = stream;
-    },
-    cameraFOV: 40
-  };
+    let angle = Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
 
-  const overlay = {
-    init() {
-      this.frame();
-    },
-
-    frame() {
-      setTimeout(() => {
-        window.requestAnimationFrame(overlay.frame);
-
-        overlay.render();
-      }, 1000 / 60);
-    },
-
-    /**
-     * Render loop
-     */
-    render() {
-      // If not loading and no records
-      if(!app.store.isLoading && location.position && compass.alpha && !app.store.objects.length) {
-        request.nearObjects(location.position);
-      }
-
-      // If records but no markers rendered
-      else if(!app.store.isLoading && app.store.objects.length && !document.querySelectorAll('.marker-box').length) {
-        const template = document.getElementById('marker');
-
-        app.store.objects.forEach(obj => {
-          const distance = utils.calculateDistance({
-            lat: location.position.latitude,
-            lon: location.position.longitude
-          }, {
-            lat: obj.WGS84_Y,
-            lon: obj.WGS84_X
-          });
-
-          if(distance <= 2000) {
-            const instance = template.content.cloneNode(true);
-            instance.getElementById('distance').innerText = distance + 'm';
-            instance.querySelector('.marker-box').href = obj.URL;
-            instance.querySelector('.marker-box').id = obj.Id;
-            document.getElementById('overlay').append(instance);
-          }
-        });
-      }
-
-      // Main marker positioning
-      else {
-        const userLatLon = {
-          lat: location.position.latitude,
-          lon: location.position.longitude
-        };
-
-        app.store.objects.forEach(obj => {
-          const element = document.getElementById(obj.Id);
-          const objLatLon = {
-            lat: obj.WGS84_Y,
-            lon: obj.WGS84_X
-          };
-
-          const angle = utils.calculateAngle(userLatLon, objLatLon);
-
-          const visibleArea = {
-            min: -videoStream.cameraFOV / 2,
-            max: videoStream.cameraFOV / 2
-          };
-
-          const viewportOffset = {
-            min: -app.width / 2,
-            max: app.width / 2
-          };
-
-          if(angle >= compass.alpha + visibleArea.min && angle <= compass.alpha + visibleArea.max) {
-            const delta = angle - compass.alpha;
-
-            const distance = utils.calculateDistance(userLatLon, objLatLon);
-            const scale = utils.convertRange(distance, {min: 0, max: 2000}, {min: 1, max: 0.3});
-            const translation = utils.convertRange(delta, visibleArea, viewportOffset);
-
-            element.style.display = 'flex';
-            element.style.transform = `scale(${scale}) translate(${translation}px, ${compass.beta * 10}px)`;
-            element.style.zIndex = `${Math.floor(scale * 100)}`; // dem nasty codes
-            element.style.opacity = `${scale}`; // dem nasty codes
-          } else {
-            element.style.display = 'none';
-          }
-
-        });
-      }
+    while(angle < 0) {
+      angle += 360;
     }
-  };
 
-  app.init();
+    return angle;
+  }
+
+  /**
+   * Convert value from one range to another
+   * @param {Number} value value to convert
+   * @param {Object} oldRange min, max of values range
+   * @param {Object} newRange min, max of desired range
+   * @return {Number} value converted to other range
+   */
+  function convertRange(value, oldRange, newRange) {
+    return ((value - oldRange.min) * (newRange.max - newRange.min)) / (oldRange.max - oldRange.min) + newRange.min;
+  }
+
+  /**
+   * Throttles function to limit rate of execution
+   * @param {Function} fn Function to limit
+   * @param {Number} threshold fire every n ms
+   */
+  function throttle(fn, threshold) {
+    let last;
+    let deferTimer;
+
+    return function() {
+      const context = this;
+
+      const now = +new Date;
+      const args = arguments;
+
+      if(last && now < last + threshold) {
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(() => {
+          last = now;
+          fn.apply(context, args);
+        }, threshold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
 }());
