@@ -14,9 +14,7 @@
     });
   });
 
-  window.addEventListener('deviceorientationabsolute', event => {
-
-  });
+  window.addEventListener('deviceorientationabsolute', throttle(updateMarkerLocations, 1000 / 60));
 
   // Utils
   // ----------------------------------------------------------------------------------------------------------------
@@ -193,12 +191,19 @@
     objectsArray.forEach(object => {
       const instance = template.content.cloneNode(true);
       const markerBox = instance.querySelector('.marker-box');
+
+      const distanceRange = { min: 0, max: 2000 };
+      const opacityRange = { min: 1, max: 0.3 };
+      const opacity = convertRange(object.distance, distanceRange, opacityRange);
       
       instance.getElementById('distance').innerText = object.distance + 'm';
 
       markerBox.setAttribute('href', object.URL);
       markerBox.setAttribute('data-angle', object.angle);
       markerBox.setAttribute('data-distance', object.distance);
+
+      markerBox.style.zIndex = `${Math.floor(opacity * 100)}`;
+      markerBox.style.opacity = `${opacity}`;
 
       element.appendChild(instance);
     });
@@ -214,5 +219,39 @@
     }
   }
 
+  function updateMarkerLocations(event) {
+    let { alpha, gamma } = event;
+    let translationY = -(90 + gamma);
+ 
+    /**
+     * Alpha flips 180degrees when gamma is across the tipping point of 90deg
+     * gamma range: 0 ... -87, -88, -89, 89, 88, 87, ... 0
+     */
+    if(gamma > 0) {
+      alpha = alpha - 180;
+      translationY = 90 - gamma;
+    }
+
+    document.querySelectorAll('.marker-box').forEach(marker => {
+      const angle = marker.getAttribute('data-angle');
+      const distance = marker.getAttribute('data-distance');
+
+      const distanceRange = { min: 0, max: 2000 };
+      const scaleRange = { min: 1, max: 0.3 };
+      const visibleArea = { min: -20, max: 20 }; // FOV Range
+      const viewportOffset = { min: -(window.innerHeight / 2), max: window.innerHeight / 2 };
+
+      if(angle >= alpha - 20 || angle <= alpha + 20) {
+        const delta = angle - alpha;
+        const scale = convertRange(distance, distanceRange, scaleRange);
+        const translation = convertRange(delta, visibleArea, viewportOffset);
+
+        marker.style.display = 'flex';
+        marker.style.transform = `scale(${scale}) translate(${-1 * translation}px, ${translationY * 10}px)`;
+      } else {
+        marker.style.display = 'none';
+      }
+    });
+  }
 
 }());
