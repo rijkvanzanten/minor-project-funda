@@ -29,8 +29,14 @@ header {
   padding: 0.5em;
 }
 
-header img {
+img {
   height: 2em;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  filter: grayscale(1);
+  opacity: 0.3;
+  z-index: 50;
 }
 
 main {
