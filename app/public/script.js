@@ -6,7 +6,11 @@
 
   watchLocation(location => {
     fetchObjects(location, objects => {
-      renderObjects(objects);
+      renderObjects(
+        document.getElementById('overlay'),
+        objects,
+        document.getElementById('marker')
+      );
     });
   });
 
@@ -23,9 +27,9 @@
    * @return {Number} Meters between points
    */
   function calculateDistance(latLon1, latLon2) {
-    const φ1 = toRadians(latLon1.lat);
-    const φ2 = toRadians(latLon2.lat);
-    const Δλ = toRadians(latLon2.lon - latLon1.lon);
+    const φ1 = toRadians(latLon1.latitude);
+    const φ2 = toRadians(latLon2.latitude);
+    const Δλ = toRadians(latLon2.longitude - latLon1.longitude);
 
     const R = 6371e3;
 
@@ -154,7 +158,17 @@
     fetchLocality(location, res => {
       fetch(`/objects/${res.locality}/${res.postalCode}`)
         .then(res => res.json())
-        .then(res => callback(res.Objects))
+        .then(res => {
+          return res.filter(object => {
+            const objectLocation = {
+              latitude: object.WGS84_Y,
+              longitude: object.WGS84_X
+            };
+
+            return calculateDistance(location, objectLocation) < 2000;
+          });
+        })
+        .then(res => callback(res))
         .catch(err => console.error(err));
     });
   }
@@ -165,11 +179,11 @@
    * Renders array of house objects to screen
    * @param {Array} objectsArray 
    */
-  function renderObjects(objectsArray) {
-    clearElement(document.getElementById('overlay'));
+  function renderObjects(element, objectsArray, template) {
+    clearElement(element);
 
     objectsArray.forEach(object => {
-
+      console.log(object);
     });
   }
   
