@@ -41,6 +41,50 @@
     // Converts value to another range
     convertRange(value, oldRange, newRange) {
       return ((value - oldRange.min) * (newRange.max - newRange.min)) / (oldRange.max - oldRange.min) + newRange.min;
+    },
+
+    /**
+     * Underscores throttle function
+     */
+    throttle(func, wait, options) {
+      var timeout, context, args, result;
+      var previous = 0;
+      if (!options) options = {};
+
+      var later = function() {
+        previous = options.leading === false ? 0 : Date.now();
+        timeout = null;
+        result = func.apply(context, args);
+        if (!timeout) context = args = null;
+      };
+
+      var throttled = function() {
+        var now = Date.now();
+        if (!previous && options.leading === false) previous = now;
+        var remaining = wait - (now - previous);
+        context = this;
+        args = arguments;
+        if (remaining <= 0 || remaining > wait) {
+          if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+          }
+          previous = now;
+          result = func.apply(context, args);
+          if (!timeout) context = args = null;
+        } else if (!timeout && options.trailing !== false) {
+          timeout = setTimeout(later, remaining);
+        }
+        return result;
+      };
+
+      throttled.cancel = function() {
+        clearTimeout(timeout);
+        previous = 0;
+        timeout = context = args = null;
+      };
+
+      return throttled;
     }
   };
 
@@ -105,12 +149,12 @@
    */
   const compass = {
     init() {
-      window.addEventListener('deviceorientationabsolute', event => {
+      window.addEventListener('deviceorientationabsolute', utils.throttle(event => {
         const newValue = Math.floor(360 - event.alpha);
 
         this.alpha = newValue;
         this.beta = (90 - event.beta) * -1; // handheld vs tabletop
-      });
+      }), 1000 / 60);
     },
     value: false
   };
