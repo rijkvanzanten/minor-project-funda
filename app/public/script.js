@@ -14,6 +14,10 @@
     });
   });
 
+  window.addEventListener('deviceorientationabsolute', event => {
+
+  });
+
   // Utils
   // ----------------------------------------------------------------------------------------------------------------
   /**
@@ -52,8 +56,8 @@
    * @return {Number} angle between two points
    */
   function calculateAngle(latLon1, latLon2) {
-    const lat = latLon2.lat - latLon1.lat;
-    const lon = latLon2.lon - latLon1.lon;
+    const lat = latLon2.latitude - latLon1.latitude;
+    const lon = latLon2.longitude - latLon1.longitude;
 
     let angle = Math.floor(Math.atan2(lat, lon) * 180 / Math.PI);
 
@@ -156,7 +160,9 @@
    */
   function fetchObjects(location, callback) {
     fetchLocality(location, res => {
-      fetch(`/objects/${res.locality}/${res.postalCode}`)
+      const url = res.postalCode ? `/objects/${res.locality}/${res.postalCode}` : `/objects/${res.locality}`;
+
+      fetch(url)
         .then(res => res.json())
         .then(res => res.map(object => {
           const objectLocation = {
@@ -165,7 +171,8 @@
           };
 
           return Object.assign(object, {
-            distance: calculateDistance(location, objectLocation)
+            distance: calculateDistance(location, objectLocation),
+            angle: calculateAngle(location, objectLocation)
           });
         }))
         .then(res => res.filter(object => object.distance < 2000))
@@ -185,9 +192,14 @@
 
     objectsArray.forEach(object => {
       const instance = template.content.cloneNode(true);
+      const markerBox = instance.querySelector('.marker-box');
+      
       instance.getElementById('distance').innerText = object.distance + 'm';
-      instance.querySelector('.marker-box').href = object.URL;
-      instance.querySelector('.marker-box').id = object.Id;
+
+      markerBox.setAttribute('href', object.URL);
+      markerBox.setAttribute('data-angle', object.angle);
+      markerBox.setAttribute('data-distance', object.distance);
+
       element.appendChild(instance);
     });
   }
