@@ -247,7 +247,7 @@
         const translation = convertRange(delta, visibleArea, viewportOffset);
 
         marker.style.display = 'flex';
-        marker.style.transform = `scale(${scale}) translate(${-1 * translation}px, ${translationY * 10}px)`;
+        marker.style.transform = `scale(${scale}) translate(${-translation}px, ${translationY * 10}px)`;
       } else {
         marker.style.display = 'none';
       }
