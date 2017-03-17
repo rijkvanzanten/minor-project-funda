@@ -2,8 +2,12 @@
 
 The current implementation of the Funda AR Webapp fully relies on JavaScript (JS) for data fetching and view rendering. Because of that; opening the app without JS results in the following:
 
-![Artists rendition of the Funda AR App without JS](phone.png)  
-_Artists rendition of the Funda AR App without JS_
+<figure>
+  <img src="phone.png" style="width: 10%;" />
+  <figcaption>
+    _Artists rendition of the Funda AR App without JS_
+  </figcaption>
+</figure>
 
 The main feature of the app is viewing which houses are the nearest to your current location. The reason that it fully depends on JS at the moment is because we use the users current GPS location to request the nearest houses.  
 This has as a negative side-effect that the app won't function as expected when the user doesn't allow GPS tracking.
