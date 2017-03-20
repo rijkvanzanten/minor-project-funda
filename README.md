@@ -1,9 +1,3 @@
 # Funda AR
 
-Provide your own `app/api-keys.js` file:
-```js
-module.exports = {
-  funda: '[key]',
-  google: '[key]'
-}
-```
+I'll try to match [@wooorm](https://github.com/wooorm/dictionary)'s codestyle and file structure as much as possible to get familiar with a different perspective on the matter.
