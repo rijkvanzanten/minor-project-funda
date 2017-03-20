@@ -1,11 +1,12 @@
 {
   "name": "minor-project-funda",
-  "version": "0.0.1",
-  "description": "",
-  "main": "server/server.js",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Augmented Reality app to find houses available in near you",
+  "main": "server.js",
   "scripts": {
-    "start": "node app/server.js",
-    "dev": "nodemon app/server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,11 @@
   },
   "homepage": "https://github.com/rijkvanzanten/minor-project-funda#readme",
   "dependencies": {
-    "ejs": "^2.5.6",
     "express": "^4.15.1",
-    "node-fetch": "^1.6.3"
+    "vdom-to-html": "^2.3.1",
+    "virtual-dom": "^2.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }
