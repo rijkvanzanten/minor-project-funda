@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/rijkvanzanten/minor-project-funda#readme",
   "dependencies": {
+    "concat-stream": "^1.6.0",
+    "dotenv": "^4.0.0",
     "express": "^4.15.1",
     "vdom-to-html": "^2.3.1",
     "virtual-dom": "^2.1.1"
