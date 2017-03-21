@@ -2,7 +2,7 @@
   "name": "minor-project-funda",
   "version": "1.0.0",
   "private": true,
-  "description": "Augmented Reality app to find houses available in near you",
+  "description": "Augmented Reality app to find houses available near you",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
