@@ -29,5 +29,9 @@
     "stylelint": "^7.9.0",
     "stylelint-config-standard": "^16.0.0",
     "xo": "^0.18.0"
+  },
+  "scripts": {
+    "build-js": "browserify lib/browser.js -p bundle-collapser/plugin | esmangle > public/main.js",
+    "watch-js": "watchify lib/browser.js --debug -o public/main.js -v"
   }
 }
