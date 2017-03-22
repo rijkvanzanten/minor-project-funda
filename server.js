@@ -25,13 +25,15 @@ function entries(req, res) {
   loadHouses(val, callback);
 
   function callback(err, buffer) {
-    if(err) throw err;
+    if (err) {
+      throw err;
+    }
     respond(res, err, buffer ? JSON.parse(buffer) : false);
   }
 }
 
 function home(req, res) {
-  if(req.query.locality) {
+  if (req.query.locality) {
     res.redirect('/' + req.query.locality);
   } else {
     respond(res);
@@ -60,7 +62,7 @@ function createApiUrl(locality, zipcode) {
 }
 
 function loadHouses(locality, zipcode, callback) {
-  if(callback == null && typeof zipcode === 'function') {
+  if (callback === null && typeof zipcode === 'function') {
     callback = zipcode;
     zipcode = '';
   }
