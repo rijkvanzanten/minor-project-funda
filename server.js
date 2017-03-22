@@ -56,7 +56,7 @@ function respond(res, err, data) {
 }
 
 function createApiUrl(locality, zipcode) {
-  return `https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}`;
+  return `https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}&pagesize=25`;
 }
 
 function loadHouses(locality, zipcode, callback) {
