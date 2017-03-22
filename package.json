@@ -31,7 +31,16 @@
     "xo": "^0.18.0"
   },
   "scripts": {
+    "lint": "stylelint public/**/*.css & xo",
     "build-js": "browserify lib/browser.js -p bundle-collapser/plugin | esmangle > public/main.js",
     "watch-js": "watchify lib/browser.js --debug -o public/main.js -v"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-standard"
+  },
+  "xo": {
+    "space": true,
+    "esnext": true,
+    "ignore": [ "public/main.js" ]
   }
 }
