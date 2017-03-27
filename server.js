@@ -5,6 +5,9 @@ const toHTML = require('vdom-to-html');
 const concatStream = require('concat-stream');
 const render = require('./lib/render');
 
+const host = process.env.HOST || 0.0.0.0;
+const port = process.env.PORT || 3000;
+
 require('dotenv').config();
 
 const key = process.env.FUNDA_KEY;
@@ -17,7 +20,7 @@ express()
   .get('/', home)
   .get('/:locality', entries)
   .disable('x-powered-by')
-  .listen(3000);
+  .listen(port, host);
 
 function entries(req, res) {
   const val = decodeURIComponent(req.params.locality);
