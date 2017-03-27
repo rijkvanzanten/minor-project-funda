@@ -4,9 +4,15 @@
   "private": true,
   "description": "Augmented Reality app to find houses available near you",
   "scripts": {
-    "lint": "stylelint ",
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "lint": "stylelint src/**/*.css & xo",
+    "build-js": "browserify src/browser.js -p bundle-collapser/plugin | esmangle > public/main.js",
+    "watch-js": "watchify src/browser.js --debug -o public/main.js -v",
+    "build-css": "csso src/style.css public/style.css",
+    "watch-css": "watch 'npm run build-css' src",
+    "dev": "nodemon server.js --watch server.js --watch lib & npm run watch-css & npm run serve",
+    "serve": "browser-sync start --proxy http://localhost:3000 --browser 'google chrome' --https",
+    "build": "npm run lint && npm run build-js && npm run build-css",
+    "start": "npm run build && node server.js"
   },
   "repository": "rijkvanzanten/minor-project-funda",
   "author": "Rijk van Zanten <rijkvanzanten@me.com> (rijks.website)",
@@ -24,16 +30,12 @@
   },
   "devDependencies": {
     "browserify": "^14.1.0",
+    "csso-cli": "^1.0.0",
     "esmangle": "^1.0.1",
     "nodemon": "^1.11.0",
     "stylelint": "^7.9.0",
     "stylelint-config-standard": "^16.0.0",
     "xo": "^0.18.0"
-  },
-  "scripts": {
-    "lint": "stylelint public/**/*.css & xo",
-    "build-js": "browserify lib/browser.js -p bundle-collapser/plugin | esmangle > public/main.js",
-    "watch-js": "watchify lib/browser.js --debug -o public/main.js -v"
   },
   "stylelint": {
     "extends": "stylelint-config-standard"
@@ -41,6 +43,8 @@
   "xo": {
     "space": true,
     "esnext": true,
-    "ignore": [ "public/main.js" ]
+    "ignore": [
+      "public/script.js"
+    ]
   }
 }
