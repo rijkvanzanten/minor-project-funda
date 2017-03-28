@@ -38,6 +38,8 @@ header img {
 }
 
 form {
+  display: flex;
+  align-items: flex-end;
   max-width: var(--max-width);
   background-color: var(--orange);
   padding: 1em;
@@ -45,29 +47,33 @@ form {
   box-sizing: border-box;
 }
 
-form > * {
-  appearance: none;
-  -webkit-appearance: none;
-  display: block;
-  text-align: center;
-  width: 80%;
-  margin: 1em auto;
-  box-sizing: border-box;
+form label {
+  display: flex;
+  flex-direction: column;
+  margin: 0 2em;
+  flex-grow: 1;
 }
 
 form input,
 form button {
-  font-size: 1em;
-  padding: 0.5em 1em;
+  appearance: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
+  height: 40px;
+  background-color: white;
+  font-size: 1em;
+}
+
+form input {
+  padding: 0 1em;
+  margin-top: 0.5em;
 }
 
 form button {
-  background-color: white;
-  margin-top: 2em;
   cursor: pointer;
   transition: box-shadow 200ms ease;
+  margin: 0 2em;
+  width: 200px;
 
   &:hover {
     box-shadow: 0 0 4px 0 #61c5f8;
