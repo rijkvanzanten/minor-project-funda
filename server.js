@@ -88,7 +88,7 @@ function respond(res, err, data) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Funda</title>
     <link rel="stylesheet" href="/static/style.css">
-    <header><img src="/static/funda-logo.svg" alt="logo-funda" />
+    <header><img src="/static/funda-logo.svg" alt="logo-funda" /></header>
     ${doc}
   `);
 }
