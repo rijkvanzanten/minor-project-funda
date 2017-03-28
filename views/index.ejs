@@ -12,6 +12,7 @@
     </label>
     <button type="submit">Zoek</button>
   </form>
+  <div class="results"></div>
   <%- include('./partials/houses', {housesArray}); %>
   <% if(housesArray.length === 0) { %>
     <p class="shrug">¯\_(ツ)_/¯</p>

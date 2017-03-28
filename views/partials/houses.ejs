@@ -1,8 +1,6 @@
-<div class="results">
-  <% housesArray.forEach(obj => { %>
-    <article>
-      <img src="<%= obj.FotoLarge %>" alt="<%= obj.Adres %>" />
-      <h2><%= obj.Adres %></h2>
-    </article>
-  <% }) %>
-</div>
+<% housesArray.forEach(obj => { %>
+  <article>
+    <img src="<%= obj.FotoLarge %>" alt="<%= obj.Adres %>" />
+    <h2><%= obj.Adres %></h2>
+  </article>
+<% }) %>

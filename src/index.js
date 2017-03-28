@@ -32,8 +32,14 @@
     const html = document.getElementsByTagName('html')[0];
     const documentHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
 
-    if (window.scrollY + window.innerHeight >= documentHeight - (window.innerHeight / 5) && !fetching) {
-      console.log('ga fetch dan jonguh');
+    if (window.scrollY + window.innerHeight >= documentHeight - window.innerHeight && !fetching) {
+      fetchHouses(reqInfo.locality, reqInfo.zipcode, reqInfo.page, callback);
+      reqInfo.page += 1;
+    }
+
+    function callback(err, res) {
+      state.houses = [...state.houses, ...res.data];
+      render();
     }
   }
 
