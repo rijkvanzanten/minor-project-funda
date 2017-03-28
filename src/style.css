@@ -40,4 +40,27 @@ header img {
 form {
   max-width: var(--max-width);
   background-color: var(--orange);
+  padding: 1em;
+  margin: 0 auto;
+}
+
+form > * {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  text-align: center;
+  width: 80%;
+  margin: 1em auto;
+}
+
+form input {
+  font-size: 1em;
+}
+
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
 }
