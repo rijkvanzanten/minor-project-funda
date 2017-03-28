@@ -7,7 +7,7 @@
     "lint": "stylelint src/**/*.css & xo",
     "build-js": "browserify src/browser.js -p bundle-collapser/plugin | esmangle > public/main.js",
     "watch-js": "watchify src/browser.js --debug -o public/main.js -v",
-    "build-css": "csso src/style.css public/style.css",
+    "build-css": "postcss src/*.css --use postcss-cssnext | csso -o public/style.css",
     "watch-css": "nodemon -e css -w src -x \"npm run build-css\"",
     "dev": "nodemon server.js --watch server.js --watch lib & open http://localhost:3000 & npm run watch-css & npm run watch-js",
     "build": "npm run lint && npm run build-js && npm run build-css",
@@ -33,6 +33,9 @@
     "csso-cli": "^1.0.0",
     "esmangle": "^1.0.1",
     "nodemon": "^1.11.0",
+    "postcss": "^5.2.16",
+    "postcss-cli": "^3.0.0",
+    "postcss-cssnext": "^2.10.0",
     "stylelint": "^7.9.0",
     "stylelint-config-standard": "^16.0.0",
     "xo": "^0.18.0"
