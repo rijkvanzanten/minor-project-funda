@@ -2,9 +2,7 @@ const url = require('url');
 const https = require('https');
 const path = require('path');
 const express = require('express');
-const toHTML = require('vdom-to-html');
 const concatStream = require('concat-stream');
-const render = require('./lib/render');
 
 const host = process.env.HOST || '127.0.0.1';
 const port = process.env.PORT || 3000;
@@ -19,6 +17,9 @@ if (!key) {
 
 express()
   .use('/static/', express.static(path.join(__dirname, './public'), {maxAge: '100d'}))
+  .use('/views/', express.static(path.join(__dirname, './views'), {maxAge: '100d'}))
+  .set('view engine', 'ejs')
+  .set('views', path.join(__dirname, '/views'))
   .get('/', home)
   .get(['/:locality', '/:locality/:zipcode/:page?'], location)
   .disable('x-powered-by')
@@ -51,8 +52,9 @@ function location(req, res) {
 
   load(locality, zipcode, page, callback);
 
-  function callback(err, buf) {
-    respond(res, err, buf ? JSON.parse(buf) : {locality, found: false});
+  function callback(err, buffer) {
+    const data = JSON.parse(buffer).Objects;
+    respond(res, err, {locality, zipcode, page}, data);
   }
 }
 
@@ -75,18 +77,6 @@ function load(locality, zipcode, page, callback) {
   }
 }
 
-function respond(res, err, data) {
-  const doc = toHTML(render(err, data));
-
-  res.set('Cache-Control', 'public, max-age=2678400');
-  res.send(`
-    <!doctype html>
-    <html lang="nl">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Funda</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <header><img src="/static/funda-logo.svg" alt="logo-funda" /></header>
-    ${doc}
-  `);
+function respond(res, err = {}, reqInfo = {locality: '', zipcode: '', page: 2}, housesArray = []) {
+  res.render('index', {err, reqInfo, housesArray});
 }

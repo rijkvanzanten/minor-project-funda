@@ -1,0 +1,26 @@
+<%- include partials/head %>
+<header><img src="/static/funda-logo.svg" alt="logo-funda" /></header>
+<main>
+  <form action="/">
+    <label>
+      Plaatsnaam
+      <input type="text" name="locality" autocomplete="off" autofocus= placeholder="Amsterdam" value="<%= reqInfo.locality %>" />
+    </label>
+    <label>
+      Postcode
+      <input type="text" name="zipcode" autocomplete="off" maxlength="6" placeholder="1098" value="<%= reqInfo.zipcode %>" />
+    </label>
+    <button type="submit">Zoek</button>
+  </form>
+  <div class="results">
+    <% housesArray.forEach(obj => { %>
+      <article>
+        <img src="<%= obj.FotoLarge %>" alt="<%= obj.Adres %>" />
+        <h2><%= obj.Adres %></h2>
+      </article>
+    <% }) %>
+  </div>
+  <% if(housesArray.length === 0) { %>
+    <p class="shrug">¯\_(ツ)_/¯</p>
+  <% } %>
+</main>

@@ -109,3 +109,9 @@ input::-webkit-contacts-auto-fill-button {
   margin: 2em;
   background-color: white;
 }
+
+.shrug {
+  text-align: center;
+  font-size: 5em;
+  opacity: 0.4;
+}
