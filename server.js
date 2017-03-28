@@ -24,7 +24,7 @@ express()
   .listen(port, host, () => console.log(`🌎  Server started! https://${host}:${port}`));
 
 function home(req, res) {
-  if (req.query.word) {
+  if (req.query.locality) {
     res.redirect('/' + req.query.word);
   } else {
     respond(res);
