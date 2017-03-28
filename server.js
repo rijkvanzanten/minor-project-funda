@@ -62,7 +62,7 @@ function load(locality, zipcode, page, callback) {
   locality = String(locality).toLowerCase();
   zipcode = zipcode ? zipcode.replace(/\s/g, '') : '';
 
-  https.get(url.parse(`https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}&page=${page}`), onresponse);
+  https.get(url.parse(`https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}/sorteer-postcode-op/&page=${page}`), onresponse);
 
   function onresponse(response) {
     response.on('error', callback).pipe(concatStream(onconcat));
