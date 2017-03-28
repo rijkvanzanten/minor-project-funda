@@ -42,6 +42,7 @@ form {
   background-color: var(--orange);
   padding: 1em;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 form > * {
@@ -51,10 +52,26 @@ form > * {
   text-align: center;
   width: 80%;
   margin: 1em auto;
+  box-sizing: border-box;
 }
 
-form input {
+form input,
+form button {
   font-size: 1em;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 4px;
+}
+
+form button {
+  background-color: white;
+  margin-top: 2em;
+  cursor: pointer;
+  transition: box-shadow 200ms ease;
+
+  &:hover {
+    box-shadow: 0 0 4px 0 #61c5f8;
+  }
 }
 
 input::-webkit-contacts-auto-fill-button {
