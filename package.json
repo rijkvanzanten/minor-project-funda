@@ -9,8 +9,7 @@
     "watch-js": "watchify src/browser.js --debug -o public/main.js -v",
     "build-css": "csso src/style.css public/style.css",
     "watch-css": "watch 'npm run build-css' src",
-    "dev": "nodemon server.js --watch server.js --watch lib & npm run serve & npm run watch-css & npm run watch-js",
-    "serve": "browser-sync start --proxy http://localhost:3000 --browser 'google chrome' --https --files public",
+    "dev": "nodemon server.js --watch server.js --watch lib & open http://localhost:3000 & npm run watch-css & npm run watch-js",
     "build": "npm run lint && npm run build-js && npm run build-css",
     "start": "npm run build && node server.js"
   },
