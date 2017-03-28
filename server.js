@@ -54,7 +54,12 @@ function location(req, res) {
 
   function callback(err, buffer, lastPage) {
     const data = JSON.parse(buffer).Objects;
-    respond(res, err, {locality, zipcode, page, lastPage}, data);
+
+    if (req.headers['content-type'] === 'application/json') {
+      res.json({locality, zipcode, page, lastPage, data});
+    } else {
+      respond(res, err, {locality, zipcode, page, lastPage}, data);
+    }
   }
 }
 
