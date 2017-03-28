@@ -18,28 +18,60 @@ if (!key) {
 
 express()
   .get('/', home)
-  .get('/:locality', entries)
+  .get('/:locality/:zipcode/:page', location)
+  .use(express.static('./public', {maxAge: '100d'}))
   .disable('x-powered-by')
   .listen(port, host, () => console.log(`🌎  Server started! https://${host}:${port}`));
 
-function entries(req, res) {
-  const val = decodeURIComponent(req.params.locality);
-
-  loadHouses(val, callback);
-
-  function callback(err, buffer) {
-    if (err) {
-      throw err;
-    }
-    respond(res, err, buffer ? JSON.parse(buffer) : false);
+function home(req, res) {
+  if (req.query.word) {
+    res.redirect('/' + req.query.word);
+  } else {
+    respond(res);
   }
 }
 
-function home(req, res) {
-  if (req.query.locality) {
-    res.redirect('/' + req.query.locality);
+function location(req, res) {
+  const locality = decodeURIComponent(req.params.locality);
+  let zipcode;
+  let page;
+
+  if (req.params.zipcode.length !== 6 && req.params.page !== undefined) {
+    zipcode = false;
+    page = req.params.zipcode ? decodeURIComponent(req.params.zipcode) : 1;
   } else {
-    respond(res);
+    zipcode = req.params.zipcode.replace(/\s/g, '');
+    page = req.params.page ? decodeURIComponent(req.params.page) : 1;
+  }
+
+  load(locality, zipcode, page, callback);
+
+  function callback(err, buf) {
+    respond(res, err, buf ? JSON.parse(buf) : {locality, found: false});
+  }
+}
+
+function load(locality, zipcode, page, callback) {
+  if (typeof zipcode !== 'string' && typeof zipcode === 'number') {
+    zipcode = page;
+    page = callback;
+  }
+
+  locality = String(locality).toLowerCase();
+  zipcode = zipcode.replace(/\s/g, '');
+
+  https.get(url.parse(`https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}`), onresponse);
+
+  function onresponse(response) {
+    response.on('error', callback).pipe(concatStream(onconcat));
+
+    function onconcat(buffer) {
+      if (response.statusCode !== 200) {
+        buffer = JSON.stringify({location, found: false});
+      }
+
+      callback(null, buffer);
+    }
   }
 }
 
@@ -52,31 +84,9 @@ function respond(res, err, data) {
     <html lang="nl">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Funda AR</title>
-    <body>
-      ${doc}
-    </body>
-    </html>
+    <title>Funda</title>
+    <link rel="stylesheet" href="/style.css">
+    <header><img src="/funda-logo.svg" alt="logo-funda" />
+    ${doc}
   `);
-}
-
-function createApiUrl(locality, zipcode) {
-  return `https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}&pagesize=25`;
-}
-
-function loadHouses(locality, zipcode, callback) {
-  if (callback === null && typeof zipcode === 'function') {
-    callback = zipcode;
-    zipcode = '';
-  }
-
-  https.get(url.parse(createApiUrl(locality, zipcode)), onResponse);
-
-  function onResponse(response) {
-    response.on('error', callback).pipe(concatStream(onConcatStream));
-
-    function onConcatStream(buffer) {
-      callback(null, buffer);
-    }
-  }
 }
