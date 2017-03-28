@@ -23,4 +23,12 @@
   <% if(housesArray.length === 0) { %>
     <p class="shrug">¯\_(ツ)_/¯</p>
   <% } %>
+  <div class="pagination">
+    <% if(reqInfo.page > 1) { %>
+      <a href="/<%= reqInfo.locality %>/<%= reqInfo.zipcode %>/<%= Number(reqInfo.page) - 1 %>">Vorige pagina</a>
+    <% } %>
+    <% if(!reqInfo.lastPage) { %>
+      <a href="/<%= reqInfo.locality %>/<%= reqInfo.zipcode %>/<%= Number(reqInfo.page) + 1 %>">Volgende pagina</a>
+    <% } %>
+  </div>
 </main>

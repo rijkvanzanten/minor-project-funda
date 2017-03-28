@@ -39,22 +39,22 @@ function location(req, res) {
   let {zipcode, page} = req.params;
 
   if (!zipcode && !page) {
-    zipcode = false;
+    zipcode = '';
     page = 1;
   } else if (zipcode && !page) {
     if (zipcode.length === 6 || zipcode.length === 4) {
       page = 1;
     } else {
       page = zipcode;
-      zipcode = false;
+      zipcode = '';
     }
   }
 
   load(locality, zipcode, page, callback);
 
-  function callback(err, buffer) {
+  function callback(err, buffer, lastPage) {
     const data = JSON.parse(buffer).Objects;
-    respond(res, err, {locality, zipcode, page}, data);
+    respond(res, err, {locality, zipcode, page, lastPage}, data);
   }
 }
 
@@ -68,15 +68,13 @@ function load(locality, zipcode, page, callback) {
     response.on('error', callback).pipe(concatStream(onconcat));
 
     function onconcat(buffer) {
-      if (response.statusCode !== 200) {
-        buffer = JSON.stringify({location, found: false});
-      }
+      const paging = JSON.parse(buffer).Paging;
 
-      callback(null, buffer);
+      callback(null, buffer, paging.HuidigePagina === paging.AantalPaginas);
     }
   }
 }
 
-function respond(res, err = {}, reqInfo = {locality: '', zipcode: '', page: 2}, housesArray = []) {
+function respond(res, err = {}, reqInfo = {locality: '', zipcode: '', page: 2, lastPage: false}, housesArray = []) {
   res.render('index', {err, reqInfo, housesArray});
 }
