@@ -1,5 +1,6 @@
 const url = require('url');
 const https = require('https');
+const path = require('path');
 const express = require('express');
 const toHTML = require('vdom-to-html');
 const concatStream = require('concat-stream');
@@ -17,9 +18,9 @@ if (!key) {
 }
 
 express()
+  .use('/static/', express.static(path.join(__dirname, './public'), {maxAge: '100d'}))
   .get('/', home)
-  .get('/:locality/:zipcode/:page', location)
-  .use(express.static('./public', {maxAge: '100d'}))
+  .get(['/:locality', '/:locality/:zipcode/:page?'], location)
   .disable('x-powered-by')
   .listen(port, host, () => console.log(`🌎  Server started! https://${host}:${port}`));
 
@@ -33,16 +34,22 @@ function home(req, res) {
 
 function location(req, res) {
   const locality = decodeURIComponent(req.params.locality);
-  let zipcode;
-  let page;
 
-  if (req.params.zipcode.length !== 6 && req.params.page !== undefined) {
+  let {zipcode, page} = req.params;
+
+  if (!zipcode && !page) {
     zipcode = false;
-    page = req.params.zipcode ? decodeURIComponent(req.params.zipcode) : 1;
-  } else {
-    zipcode = req.params.zipcode.replace(/\s/g, '');
-    page = req.params.page ? decodeURIComponent(req.params.page) : 1;
+    page = 1;
+  } else if (zipcode && !page) {
+    if (zipcode.length === 6 || zipcode.length === 4) {
+      page = 1;
+    } else {
+      page = zipcode;
+      zipcode = false;
+    }
   }
+
+  console.log(`zip: ${zipcode}, page: ${page}`);
 
   load(locality, zipcode, page, callback);
 
@@ -52,15 +59,10 @@ function location(req, res) {
 }
 
 function load(locality, zipcode, page, callback) {
-  if (typeof zipcode !== 'string' && typeof zipcode === 'number') {
-    zipcode = page;
-    page = callback;
-  }
-
   locality = String(locality).toLowerCase();
-  zipcode = zipcode.replace(/\s/g, '');
+  zipcode = zipcode ? zipcode.replace(/\s/g, '') : '';
 
-  https.get(url.parse(`https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}`), onresponse);
+  https.get(url.parse(`https://partnerapi.funda.nl/feeds/Aanbod.svc/json/${key}/?type=koop&zo=/${locality}/${zipcode}&page=${page}`), onresponse);
 
   function onresponse(response) {
     response.on('error', callback).pipe(concatStream(onconcat));
@@ -85,8 +87,8 @@ function respond(res, err, data) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Funda</title>
-    <link rel="stylesheet" href="/style.css">
-    <header><img src="/funda-logo.svg" alt="logo-funda" />
+    <link rel="stylesheet" href="/static/style.css">
+    <header><img src="/static/funda-logo.svg" alt="logo-funda" />
     ${doc}
   `);
 }
