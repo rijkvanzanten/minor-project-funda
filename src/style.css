@@ -2,6 +2,7 @@
   --orange: #f7a103;
   --light-blue: #e6f2f7;
   --black: #333;
+  --max-width: 64em;
 }
 
 * {
@@ -24,4 +25,19 @@ body {
   height: 100%;
   width: 100%;
   margin: 0;
+}
+
+header {
+  background-color: var(--orange);
+  padding: 1em;
+  margin-bottom: 3em;
+}
+
+header img {
+  height: 2em;
+}
+
+form {
+  max-width: var(--max-width);
+  background-color: var(--orange);
 }

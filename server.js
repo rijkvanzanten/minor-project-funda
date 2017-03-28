@@ -26,7 +26,7 @@ express()
 
 function home(req, res) {
   if (req.query.locality) {
-    res.redirect('/' + req.query.locality);
+    res.redirect(`/${req.query.locality}/${req.query.zipcode || ''}`);
   } else {
     respond(res);
   }
@@ -48,8 +48,6 @@ function location(req, res) {
       zipcode = false;
     }
   }
-
-  console.log(`zip: ${zipcode}, page: ${page}`);
 
   load(locality, zipcode, page, callback);
 
