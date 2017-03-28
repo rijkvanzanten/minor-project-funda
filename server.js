@@ -25,7 +25,7 @@ express()
 
 function home(req, res) {
   if (req.query.locality) {
-    res.redirect('/' + req.query.word);
+    res.redirect('/' + req.query.locality);
   } else {
     respond(res);
   }
