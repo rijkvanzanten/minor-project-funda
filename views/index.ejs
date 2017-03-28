@@ -12,14 +12,7 @@
     </label>
     <button type="submit">Zoek</button>
   </form>
-  <div class="results">
-    <% housesArray.forEach(obj => { %>
-      <article>
-        <img src="<%= obj.FotoLarge %>" alt="<%= obj.Adres %>" />
-        <h2><%= obj.Adres %></h2>
-      </article>
-    <% }) %>
-  </div>
+  <%- include('./partials/houses', {housesArray}); %>
   <% if(housesArray.length === 0) { %>
     <p class="shrug">¯\_(ツ)_/¯</p>
   <% } %>
@@ -32,3 +25,6 @@
     <% } %>
   </div>
 </main>
+
+<script>var __reqInfo__ = <%- JSON.stringify(reqInfo) %>;</script>
+<script src="/static/main.js"></script>
