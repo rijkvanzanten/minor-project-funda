@@ -20,6 +20,15 @@ html {
   background-color: var(--light-blue);
 }
 
+img {
+  max-width: 100%;
+  width: 100%;
+}
+
+article img {
+  width: 100%;
+}
+
 html,
 body {
   height: 100%;
@@ -45,6 +54,7 @@ form {
   padding: 1em;
   margin: 0 auto;
   box-sizing: border-box;
+  margin-bottom: 2em;
 }
 
 form label {
@@ -58,7 +68,6 @@ form input,
 form button {
   appearance: none;
   border: none;
-  border-radius: 5px;
   height: 40px;
   background-color: white;
   font-size: 1em;
@@ -86,4 +95,17 @@ input::-webkit-contacts-auto-fill-button {
   pointer-events: none;
   position: absolute;
   right: 0;
+}
+
+.results {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.results > * {
+  flex-basis: 20em;
+  flex-grow: 1;
+  margin: 2em;
+  background-color: white;
 }
